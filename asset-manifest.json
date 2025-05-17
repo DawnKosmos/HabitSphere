@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/HabitSphere/static/css/main.4e1c6dc9.css",
+    "main.js": "/HabitSphere/static/js/main.c165ff7c.js",
+    "index.html": "/HabitSphere/index.html",
+    "main.4e1c6dc9.css.map": "/HabitSphere/static/css/main.4e1c6dc9.css.map",
+    "main.c165ff7c.js.map": "/HabitSphere/static/js/main.c165ff7c.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.4e1c6dc9.css",
+    "static/js/main.c165ff7c.js"
+  ]
+}
