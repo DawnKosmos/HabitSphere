@@ -9,14 +9,18 @@ import {
   IconButton,
   Switch,
   TextField,
-  InputAdornment,
   Paper,
-  Button
+  Button,
+  FormControlLabel,
+  Checkbox,
+  Chip
 } from '@mui/material';
 import { format, addDays, subDays, isToday, isFuture } from 'date-fns';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import TodayIcon from '@mui/icons-material/Today';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 import { useHabits } from '../contexts/HabitsContext';
 import HabitStreak from './HabitStreak';
 
@@ -40,7 +44,16 @@ function DailyTracker() {
   };
   
   const handleBooleanToggle = (habitId, currentValue) => {
-    trackHabit(habitId, currentValue ? null : true, selectedDate);
+    // Toggle between true, false, and null (not set)
+    let newValue;
+    if (currentValue === true) {
+      newValue = false;
+    } else if (currentValue === false) {
+      newValue = null;
+    } else {
+      newValue = true;
+    }
+    trackHabit(habitId, newValue, selectedDate);
   };
   
   const handleNumberChange = (habitId, value) => {
@@ -59,6 +72,43 @@ function DailyTracker() {
       </Typography>
     );
   }
+  
+  // Helper function to render the status of a boolean habit
+  const renderBooleanStatus = (value) => {
+    if (value === true) {
+      return (
+        <Chip 
+          icon={<CheckCircleIcon />} 
+          label="Yes" 
+          color="success" 
+          size="small" 
+          variant="outlined"
+          sx={{ minWidth: '80px' }}
+        />
+      );
+    } else if (value === false) {
+      return (
+        <Chip 
+          icon={<CancelIcon />} 
+          label="No" 
+          color="error" 
+          size="small" 
+          variant="outlined"
+          sx={{ minWidth: '80px' }}
+        />
+      );
+    } else {
+      return (
+        <Chip 
+          label="Not set" 
+          color="default" 
+          size="small" 
+          variant="outlined"
+          sx={{ minWidth: '80px' }}
+        />
+      );
+    }
+  };
   
   return (
     <>
@@ -116,12 +166,16 @@ function DailyTracker() {
                   />
                   <Box>
                     {habit.type === 'boolean' ? (
-                      <Switch
-                        edge="end"
-                        checked={Boolean(value)}
-                        onChange={() => handleBooleanToggle(habit.id, value)}
-                        inputProps={{ 'aria-labelledby': `habit-${habit.id}` }}
-                      />
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        {renderBooleanStatus(value)}
+                        <IconButton 
+                          onClick={() => handleBooleanToggle(habit.id, value)}
+                          size="small"
+                          sx={{ ml: 1 }}
+                        >
+                          <TodayIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
                     ) : (
                       <TextField
                         type="number"

@@ -56,13 +56,22 @@ export function HabitsProvider({ children }) {
       ...habit,
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
+      order: habits.length, // Add order property for sorting
     };
     setHabits((prevHabits) => [...prevHabits, newHabit]);
   };
 
   // Delete a habit
   const deleteHabit = (habitId) => {
-    setHabits((prevHabits) => prevHabits.filter((habit) => habit.id !== habitId));
+    setHabits((prevHabits) => {
+      const filteredHabits = prevHabits.filter((habit) => habit.id !== habitId);
+      
+      // Reorder remaining habits to ensure no gaps in order
+      return filteredHabits.map((habit, index) => ({
+        ...habit,
+        order: index
+      }));
+    });
     
     // Also remove all entries for this habit
     setEntries((prevEntries) => {
@@ -111,8 +120,61 @@ export function HabitsProvider({ children }) {
     return entries[dateStr] || {};
   };
 
+  // Move habit up in order
+  const moveHabitUp = (habitId) => {
+    setHabits(prevHabits => {
+      // Sort habits by order first
+      const sortedHabits = [...prevHabits].sort((a, b) => (a.order || 0) - (b.order || 0));
+      
+      // Find the index of the habit to move
+      const index = sortedHabits.findIndex(h => h.id === habitId);
+      
+      // Can't move up if already at the top
+      if (index <= 0) return sortedHabits;
+      
+      // Swap order with the habit above it
+      const habitToMove = sortedHabits[index];
+      const habitAbove = sortedHabits[index - 1];
+      
+      const tempOrder = habitToMove.order;
+      habitToMove.order = habitAbove.order;
+      habitAbove.order = tempOrder;
+      
+      return sortedHabits;
+    });
+  };
+  
+  // Move habit down in order
+  const moveHabitDown = (habitId) => {
+    setHabits(prevHabits => {
+      // Sort habits by order first
+      const sortedHabits = [...prevHabits].sort((a, b) => (a.order || 0) - (b.order || 0));
+      
+      // Find the index of the habit to move
+      const index = sortedHabits.findIndex(h => h.id === habitId);
+      
+      // Can't move down if already at the bottom
+      if (index === -1 || index >= sortedHabits.length - 1) return sortedHabits;
+      
+      // Swap order with the habit below it
+      const habitToMove = sortedHabits[index];
+      const habitBelow = sortedHabits[index + 1];
+      
+      const tempOrder = habitToMove.order;
+      habitToMove.order = habitBelow.order;
+      habitBelow.order = tempOrder;
+      
+      return sortedHabits;
+    });
+  };
+
+  // Get sorted habits
+  const getSortedHabits = () => {
+    return [...habits].sort((a, b) => (a.order || 0) - (b.order || 0));
+  };
+
   const value = {
-    habits,
+    habits: getSortedHabits(),
     loading,
     addHabit,
     deleteHabit,
@@ -120,6 +182,8 @@ export function HabitsProvider({ children }) {
     trackHabit,
     getHabitEntry,
     getDayEntries,
+    moveHabitUp,
+    moveHabitDown
   };
 
   return (
